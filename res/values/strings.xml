@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, SocialWallpapersActivity!</string>
+    <string name="app_name">SocialWallpapers</string>
+    <string name="service_name">SocialWallpapers Service</string>
+    <string name="txt_need_auth">Sign in to Facebook</string>
+    <string name="btn_set_wallpaper">Set wallpaper</string>
+    <string name="btn_rerandom_wallpaper">Random wallpaper</string>
+    <string name="msg_success_set_wallpaper">Successfully installed wallpaper!</string>
+    <string name="msg_failed_set_wallpaper">Failed installed wallpaper :(</string>
+
+</resources>
