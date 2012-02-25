@@ -90,8 +90,20 @@ public class Api {
 				.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		Point size = new Point();
-		display.getSize(size);
-		setDisplaySize(size);
+		//TODO Hack For API 10 
+		try {
+			if(android.os.Build.VERSION.SDK_INT > 10) {
+				display.getSize(size);
+				setDisplaySize(size);
+			}else{
+				size.set(display.getWidth(), display.getHeight());
+				setDisplaySize(size);
+			}
+		} catch (Exception e) {
+			//TODO HACK
+			size.set(800, 480);
+			setDisplaySize(size);
+		}
 
 		mWallpaperManager = WallpaperManager.getInstance(c);
 	}
@@ -268,8 +280,11 @@ public class Api {
 							fql += " object_id=" + entry.getKey();
 							index++;
 						}
-						getTopLiked(fql, onPhotosRequest);
-
+						if(sorted.size() > 0) {
+							getTopLiked(fql, onPhotosRequest);
+						}else{
+							onPhotosRequest.onError();
+						}
 					}
 					break;
 
