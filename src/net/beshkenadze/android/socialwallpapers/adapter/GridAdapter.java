@@ -25,14 +25,18 @@ public class GridAdapter extends ImageAdapter {
 		if (convertView == null) { // if it's not recycled, initialize some
 									// attributes
 			imageView = new ImageView(getContext());
-			imageView.setLayoutParams(new GridView.LayoutParams(GridView.LayoutParams.MATCH_PARENT, GridView.LayoutParams.MATCH_PARENT));
+			imageView.setLayoutParams(new GridView.LayoutParams(
+					GridView.LayoutParams.MATCH_PARENT, 300));
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			imageView.setPadding(8, 8, 8, 8);
+			
 		} else {
 			imageView = (ImageView) convertView;
+			imageView.setImageDrawable(null);
 		}
-		if(getItem(position) != null) {
-			Utils.downloadImageInView(getActivity(), imageView, getItem(position));
+		if (getItem(position) != null) {
+			Utils.downloadImageInView(getActivity(), imageView,
+					getItem(position));
 		}
 		return imageView;
 	}

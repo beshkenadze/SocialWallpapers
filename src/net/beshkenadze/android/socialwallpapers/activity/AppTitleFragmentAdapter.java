@@ -36,6 +36,5 @@ class AppTitleFragmentAdapter extends FragmentPagerAdapter implements TitleProvi
 
 	public void setContent(String[] titles) {
 		mTitles = titles;
-		notifyDataSetChanged();
 	}
 }

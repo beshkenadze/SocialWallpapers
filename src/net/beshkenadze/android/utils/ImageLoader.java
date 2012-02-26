@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
-import android.view.Display;
 import android.widget.ImageView;
 
 import java.io.*;
@@ -20,6 +19,8 @@ import java.util.WeakHashMap;
 public class ImageLoader {
 	public interface OnImageLoadListener {
 		public void onLoad();
+
+		public void onError();
 	}
 
 	MemoryCache memoryCache = new MemoryCache();
@@ -276,7 +277,17 @@ public class ImageLoader {
 	}
 
 	PhotosLoader photoLoaderThread = new PhotosLoader();
-	private OnImageLoadListener listener;
+	private OnImageLoadListener listener = new OnImageLoadListener() {
+		@Override
+		public void onLoad() {
+			
+		}
+		
+		@Override
+		public void onError() {
+			
+		}
+	};
 
 	// Used to display bitmap in the UI thread
 	class BitmapDisplayer implements Runnable {
@@ -294,21 +305,17 @@ public class ImageLoader {
 			if (bitmap != null) {
 				if (bg) {
 					/*
-					if (imageView.getBackground() == null) {
-						Animation fadeIn = AnimationUtils.loadAnimation(
-								imageView.getContext(), R.anim.fade_in);
-						imageView.startAnimation(fadeIn);
-					}
-					*/
+					 * if (imageView.getBackground() == null) { Animation fadeIn
+					 * = AnimationUtils.loadAnimation( imageView.getContext(),
+					 * R.anim.fade_in); imageView.startAnimation(fadeIn); }
+					 */
 					imageView.setBackgroundDrawable(new BitmapDrawable(bitmap));
 				} else {
 					/*
-					if (imageView.getDrawable() == null) {
-						Animation fadeIn = AnimationUtils.loadAnimation(
-								imageView.getContext(), R.anim.fade_in);
-						imageView.startAnimation(fadeIn);
-					}
-					*/
+					 * if (imageView.getDrawable() == null) { Animation fadeIn =
+					 * AnimationUtils.loadAnimation( imageView.getContext(),
+					 * R.anim.fade_in); imageView.startAnimation(fadeIn); }
+					 */
 					imageView.setImageBitmap(bitmap);
 				}
 				if (listener != null) {
@@ -326,4 +333,7 @@ public class ImageLoader {
 		listener = l;
 	}
 
+	public OnImageLoadListener getOnImageLoadListener() {
+		return listener;
+	}
 }

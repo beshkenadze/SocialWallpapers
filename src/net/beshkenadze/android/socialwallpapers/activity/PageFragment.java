@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.beshkenadze.android.socialwallpapers.R;
 import net.beshkenadze.android.socialwallpapers.adapter.GridAdapter;
+import net.beshkenadze.android.socialwallpapers.adapter.ImageAdapter;
 import net.beshkenadze.android.socialwallpapers.api.Api;
 import net.beshkenadze.android.socialwallpapers.api.Api.OnPhotoRequest;
 import net.beshkenadze.android.socialwallpapers.api.Api.OnPhotosRequest;
@@ -12,6 +13,7 @@ import net.beshkenadze.android.socialwallpapers.api.Api.OnloadImageToWallpaper;
 import net.beshkenadze.android.socialwallpapers.data.Image;
 import net.beshkenadze.android.socialwallpapers.data.Photo;
 import net.beshkenadze.android.utils.Debug;
+import net.beshkenadze.android.utils.ImageLoader.OnImageLoadListener;
 import net.beshkenadze.android.utils.Utils;
 import net.londatiga.android.ActionItem;
 import net.londatiga.android.QuickAction;
@@ -32,6 +34,8 @@ import android.widget.ProgressBar;
 
 public class PageFragment extends Fragment {
 	private static final String KEY_CONTENT = "TestFragment:Content";
+	private static final int ID_LIKEWALLPAPER = 2;
+	private static final int ID_SETWALLPAPER = 1;
 
 	public static PageFragment newInstance(int id) {
 		PageFragment fragment = new PageFragment();
@@ -41,8 +45,6 @@ public class PageFragment extends Fragment {
 	}
 
 	private int mId = 0;
-	private int ID_MAKEWALLPAPER = 1;
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -87,9 +89,9 @@ public class PageFragment extends Fragment {
 			ListView lstWallpapers = (ListView) layout
 					.findViewById(R.id.lst_wallpapers);
 
-			GridAdapter gridAdapter = new GridAdapter(activity);
-			lstWallpapers.setAdapter(gridAdapter);
-			doTop(activity, prgTop, lstWallpapers, gridAdapter, true);
+			GridAdapter wallpaperAdapter = new GridAdapter(activity);
+			lstWallpapers.setAdapter(wallpaperAdapter);
+			doTop(activity, prgTop, lstWallpapers, wallpaperAdapter, true);
 
 		} else {
 			// layout = new LinearLayout(getActivity());
@@ -117,10 +119,13 @@ public class PageFragment extends Fragment {
 
 		final Api api = activity.getApi();
 		final List<String> wallpapers = new ArrayList<String>();
-		ActionItem makeWallpaperItem = new ActionItem(ID_MAKEWALLPAPER,
-				"Make wallpaper");
-		final QuickAction quickAction = new QuickAction(activity);
-		quickAction.addActionItem(makeWallpaperItem);
+		ActionItem setAsWallpaperItem = new ActionItem(ID_SETWALLPAPER,
+				"Set as wallpaper");
+		ActionItem LikeWallpaperItem = new ActionItem(ID_LIKEWALLPAPER,
+				"Like");
+		final QuickAction quickAction = new QuickAction(activity, QuickAction.HORIZONTAL);
+		quickAction.addActionItem(setAsWallpaperItem);
+		quickAction.addActionItem(LikeWallpaperItem);
 		lstWallpapers.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -138,7 +143,7 @@ public class PageFragment extends Fragment {
 						// here we can filter which action item was clicked with
 						// pos or actionId parameter
 						ActionItem actionItem = quickAction.getActionItem(pos);
-						if (actionItem.getActionId() == ID_MAKEWALLPAPER) {
+						if (actionItem.getActionId() == ID_SETWALLPAPER) {
 							String photo = wallpapers.get(selected_image);
 							if (photo != null) {
 								setWallpaper(activity, photo);
@@ -149,33 +154,19 @@ public class PageFragment extends Fragment {
 		api.getTopPhotos(activity.getAlbum(), new OnPhotosRequest() {
 			@Override
 			public void onRecive(List<Photo> photos) {
-				Debug.i("photos:" + photos.size());
 				for (Photo photo : photos) {
-					String src = null;
-					String preview = null;
+					String src = api.extractPhotoSource(photo);
+					String preview = api.extractPhotoSource(photo);
 
-					for (Image image : photo.getImages()) {
-						if (Integer.parseInt(image.getWidth()) >= api
-								.getDisplayWidth()
-								&& Integer.parseInt(image.getHeight()) >= api
-										.getDisplayHeight()) {
-							if (src != null) {
-								src = image.getSource();
-							}
-							preview = image.getSource();
-						}
-						if (src == null) {
-							src = photo.getImages().get(0).getSource();
-						}
-						if (preview == null) {
-							preview = src;
-						}
+					if (preview == null) {
+						preview = src;
 					}
+
 					wallpapers.add(src);
 					gridAdapter.setContentItem(preview);
 				}
+				Debug.i("gridAdapter:"+gridAdapter.getItems());
 				gridAdapter.notifyDataSetChanged();
-				Debug.i("gridAdapter:" + gridAdapter.getItems().size());
 				prgTop.setVisibility(View.GONE);
 				lstWallpapers.setVisibility(View.VISIBLE);
 			}
@@ -196,20 +187,37 @@ public class PageFragment extends Fragment {
 		imageView.setImageBitmap(null);
 		api.getRandomPhoto(activity.getAlbum(), new OnPhotoRequest() {
 			@Override
-			public void onRecive(final String photo, String preview) {
+			public void onRecive(final Photo photo) {
+				String preview = api.extractPhotoPreview(photo);
+				final String source = api.extractPhotoSource(photo);
+				if (source != null) {
+					Utils.downloadImageInView(activity, imageView, preview,
+							new OnImageLoadListener() {
 
-				Utils.downloadImageInView(activity, imageView, preview);
-				btnWallpaperSet.setVisibility(View.VISIBLE);
-				btnWallpaperRerandom.setVisibility(View.VISIBLE);
+								@Override
+								public void onLoad() {
+									btnWallpaperSet.setVisibility(View.VISIBLE);
+									btnWallpaperRerandom
+											.setVisibility(View.VISIBLE);
+								}
 
-				btnWallpaperSet.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (photo != null) {
-							setWallpaper(activity, photo);
+								@Override
+								public void onError() {
+									btnWallpaperRerandom
+											.setVisibility(View.VISIBLE);
+								}
+							});
+
+					btnWallpaperSet.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if (photo != null) {
+								setWallpaper(activity, source);
+							}
 						}
-					}
-				});
+					});
+				}
+
 			}
 
 			@Override

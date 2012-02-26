@@ -70,7 +70,7 @@ public class Api {
 	}
 
 	public interface OnPhotoRequest extends DefaultApiRequest {
-		void onRecive(String photo, String preview);
+		void onRecive(Photo photo);
 	}
 
 	public interface OnWallaperSet extends DefaultApiRequest {
@@ -90,17 +90,17 @@ public class Api {
 				.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		Point size = new Point();
-		//TODO Hack For API 10 
+		// TODO Hack For API 10
 		try {
-			if(android.os.Build.VERSION.SDK_INT > 10) {
+			if (android.os.Build.VERSION.SDK_INT > 10) {
 				display.getSize(size);
 				setDisplaySize(size);
-			}else{
+			} else {
 				size.set(display.getWidth(), display.getHeight());
 				setDisplaySize(size);
 			}
 		} catch (Exception e) {
-			//TODO HACK
+			// TODO HACK
 			size.set(800, 480);
 			setDisplaySize(size);
 		}
@@ -280,9 +280,9 @@ public class Api {
 							fql += " object_id=" + entry.getKey();
 							index++;
 						}
-						if(sorted.size() > 0) {
+						if (sorted.size() > 0) {
 							getTopLiked(fql, onPhotosRequest);
-						}else{
+						} else {
 							onPhotosRequest.onError();
 						}
 					}
@@ -398,20 +398,8 @@ public class Api {
 			public void onRecive(List<Photo> photos) {
 				if (photos != null && photos.size() > 0) {
 					int randInt = getRandomInt(photos.size() - 1);
-					Photo photo = photos.get((randInt > 0 ? randInt
-							: 0));
-					String src = photo.getImages().get(0)
-							.getSource();
-					String preview = src;
-					for (Image image : photo.getImages()) {
-						if (getDisplayWidth() <= Integer
-								.parseInt(image.getWidth())
-								&& getDisplayHeight() <= Integer
-										.parseInt(image.getHeight())) {
-							preview = image.getSource();
-						}
-					}
-					onPhotoRequest.onRecive(src, preview);
+					Photo photo = photos.get((randInt > 0 ? randInt : 0));
+					onPhotoRequest.onRecive(photo);
 				}
 			}
 
@@ -420,6 +408,26 @@ public class Api {
 				onPhotoRequest.onError();
 			}
 		});
+	}
+
+	public String extractPhotoSource(Photo photo) {
+		if(photo.getImages().size() > 0) {
+			return photo.getImages().get(0).getSource();
+		}
+		return null;
+	}
+
+	public String extractPhotoPreview(Photo photo) {
+		String src = photo.getImages().get(0).getSource();
+		String preview = src;
+		for (Image image : photo.getImages()) {
+			if (getDisplayWidth() <= Integer.parseInt(image.getWidth())
+					&& getDisplayHeight() <= Integer
+							.parseInt(image.getHeight())) {
+				preview = image.getSource();
+			}
+		}
+		return preview;
 	}
 
 	public void getTopPhotos(Album album,
@@ -440,7 +448,7 @@ public class Api {
 	}
 
 	private int getRandomInt(int max) {
-		if(max > 0){
+		if (max > 0) {
 			return new Random().nextInt(max);
 		}
 		return 0;

@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.view.View;
 
 public class SocialWallpapersActivity extends FragmentSherlockActivity {
 	private static final String PAGE_ID = "320494928001935";
@@ -30,9 +31,10 @@ public class SocialWallpapersActivity extends FragmentSherlockActivity {
 	private AppTitleFragmentAdapter mAdapter;
 	private Album mAlbum = new Album();
 	private CheckUpdateTask checkUpdateTask;
+	private TitlePageIndicator mIndicator;
 
 	private void checkForCrashes() {
-		CrashManager.register(this, APP_ID);
+		CrashManager.register(this, "https://rink.hockeyapp.net/", APP_ID);
 	}
 
 	private void checkForUpdates() {
@@ -54,17 +56,12 @@ public class SocialWallpapersActivity extends FragmentSherlockActivity {
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Debug.i("onCreate");
 		setContentView(R.layout.start);
 		authFacebook();
 		checkForUpdates();
 	}
 
 	private void doLoadApp() {
-		Debug.i("doLoadApp");
-
-		setContentView(R.layout.main);
-		mAdapter = new AppTitleFragmentAdapter(getSupportFragmentManager());
 		doGetCurrentAlbum();
 	}
 
@@ -85,15 +82,19 @@ public class SocialWallpapersActivity extends FragmentSherlockActivity {
 	}
 
 	private void doReadyAlbum() {
+		setContentView(R.layout.main);
 		mPager = (ViewPager) findViewById(R.id.pager);
+		mAdapter = new AppTitleFragmentAdapter(getSupportFragmentManager());
 		String[] mTitles = getResources().getStringArray(R.array.titles);
 		mAdapter.setContent(mTitles);
 		mPager.setAdapter(mAdapter);
 
-		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
-		indicator.setViewPager(mPager);
-		indicator.setFooterIndicatorStyle(IndicatorStyle.Triangle);
+		mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
+		mIndicator.setViewPager(mPager);
+		mIndicator.setFooterIndicatorStyle(IndicatorStyle.Triangle);
 
+		mPager.setVisibility(View.VISIBLE);
+		mIndicator.setVisibility(View.VISIBLE);
 		setTitle(getString(R.string.app_name) + " / " + getAlbum().getName());
 	}
 

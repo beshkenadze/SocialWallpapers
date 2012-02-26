@@ -2,31 +2,23 @@ package net.beshkenadze.android.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import net.beshkenadze.android.utils.ImageLoader.OnImageLoadListener;
 
 public class Utils {
-	
 	public static String md5(String s) {
 		try {
 			// Create MD5 Hash
@@ -71,24 +63,14 @@ public class Utils {
 //		}
 //	}
 	public static void downloadImageInView(Activity activity, final ImageView imageView, String src) {
+		downloadImageInView(activity, imageView, src, null);
+	}
+	public static void downloadImageInView(Activity activity, final ImageView imageView, String src, OnImageLoadListener listener) {
 		ImageLoader imageLoader = new ImageLoader(activity.getApplicationContext());
 		imageLoader.DisplayImage(src, imageView, false);
-//		try {
-//			new AsyncDownload(context, new onLoadListener() {
-//				public void onLoadError(String error) {
-//					
-//				}
-//				public void onLoad(Object data) {
-//					File image = (File) data;
-//					Bitmap myBitmapImage = BitmapFactory.decodeFile(image.getAbsolutePath());
-//					Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
-//					imageView.startAnimation(fadeIn);
-//					imageView.setImageDrawable(new BitmapDrawable(myBitmapImage));
-//				}
-//			}).get(new URL(src));
-//		} catch (MalformedURLException e) {
-//			e.printStackTrace();
-//		}
+		if(listener != null) {
+			imageLoader.setOnImageLoadListener(listener);
+		}
 	}
 	public static void downloadImageInBackgroundView(Activity activity, final ImageView imageView, String src) {
 		Utils.downloadImageInBackgroundView(activity, imageView, src, null);

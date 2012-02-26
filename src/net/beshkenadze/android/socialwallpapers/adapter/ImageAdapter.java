@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.beshkenadze.android.socialwallpapers.R;
-import net.beshkenadze.android.utils.Debug;
 import net.beshkenadze.android.utils.Utils;
 
 import android.app.Activity;
@@ -60,13 +59,13 @@ public class ImageAdapter extends BaseAdapter {
 			convertView = mInflater.inflate(R.layout.grid_item, null);
 			keeper = new ViewKeeper();
 			keeper.image = (ImageView) convertView
-					.findViewById(R.id.imageView1);
+					.findViewById(R.id.img_wallpaper);
 			convertView.setTag(keeper);
 		} else {
 			keeper = (ViewKeeper) convertView.getTag();
+			keeper.image.setImageBitmap(null);
 			String imageLink = getItem(position);
 			if (imageLink != null) {
-				Debug.i("imageLink:" + imageLink);
 				Utils.downloadImageInView(mActivity, keeper.image, imageLink);
 			}
 		}
